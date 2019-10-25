@@ -17,7 +17,7 @@ class Ball:
     def __init__(self, name):
         self.name = name
         self.x = rnd(100, 700)
-        self.y = rnd(100, 450)
+        self.y = rnd(100, 420)
         self.vx = choice(skorost)
         self.vy = choice(skorost)
         self.r = rnd(30, 50)
@@ -39,7 +39,7 @@ class Ball:
         self.y += self.vy
         if self.x + self.r >= 800 or self.x - self.r <= 0:
             self.vx = -self.vx
-        if self.y + self.r >= 500 or self.y - self.r <= 0:
+        if self.y + self.r >= 460 or self.y - self.r <= 0:
             self.vy = -self.vy
         self.update()
         root.after(1, self.move)
@@ -49,7 +49,7 @@ class Square:
     def __init__(self, name):
         self.name = name
         self.x = rnd(100, 700)
-        self.y = rnd(100, 450)
+        self.y = rnd(100, 420)
         self.vx = choice(skorost)
         self.vy = choice(skorost)
         self.r = rnd(30, 50)
@@ -71,7 +71,7 @@ class Square:
         self.y += self.vy
         if self.x + self.r >= 800 or self.x - self.r <= 0:
             self.vx = -self.vx
-        if self.y + self.r >= 500 or self.y - self.r <= 0:
+        if self.y + self.r >= 460 or self.y - self.r <= 0:
             self.vy = -self.vy
         self.update()
         root.after(1, self.move)
@@ -115,11 +115,18 @@ def sohranispasi():
         top.write(str(i[1]) + '\n')
 
 # Холст, на котором ввод имени
-b = tk.Canvas(root, width=800, height=100, bg='white')
+b = tk.Canvas(root, width=800, height=0, bg='white')
 b.pack()
 
-t = tk.Canvas(root, width=800, height=80, bg='white')
+t = tk.Canvas(root, width=800, height=50, bg='white')
 t.pack()
+
+def poka():
+    sohranispasi()
+    exit()
+
+bu = tk.Button(b, text="Save",width=16,height=1, command=poka, font="Verdana 25")
+bu.pack()
 
 def score():
     global n
