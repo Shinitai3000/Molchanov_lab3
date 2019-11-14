@@ -12,6 +12,12 @@ canv.pack(fill=tk.BOTH, expand=1)
 colors = ['red', 'orange', 'green', 'blue']
 skorost = [1, 2 , 3 , -1, -2, -3 ]
 
+
+
+
+
+
+
 class Ball:
 
     def __init__(self, name):

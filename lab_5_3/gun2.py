@@ -12,6 +12,7 @@ a = 450
 p = 0.0
 screen2 = canvas.create_text(30, 30, text=p, font='28')
 
+menu = 1
 
 class Ball:
     def __init__(self):
@@ -93,6 +94,15 @@ class Gun:
         self.id = canvas.create_line(self.x, self.y, self.x + 30,
                                      self.y, width=7)
 
+    def destroy1(self):
+        canvas.coords(
+            self.id,
+            -100,
+            -100,
+            -100,
+            -100
+        )
+
     def set_coords(self):
         canvas.coords(
             self.id,
@@ -123,8 +133,8 @@ class Gun:
         new_ball = Ball()
         new_ball.r += 5
         self.an = math.atan((event.y - new_ball.y) / (event.x - new_ball.x))
-        new_ball.vx = self.f2_power * math.cos(self.an)
-        new_ball.vy = - self.f2_power * math.sin(self.an)
+        new_ball.vx = 3*self.f2_power * math.cos(self.an)
+        new_ball.vy = - 3*self.f2_power * math.sin(self.an)
         balls += [new_ball]
         self.f2_on = 0
         self.f2_power = 10
@@ -184,7 +194,7 @@ class Target:
     def hit(self):
         global p
         canvas.coords(self.id, -10, -10, -10, -10)
-        p += 1 / 3
+        p += 1 / s
         canvas.itemconfig(screen2, text=round(p, 2))
 
     def set_coords(self):
@@ -218,57 +228,100 @@ class Target:
 
 screen1 = canvas.create_text(400, 300, text='', font='28')
 
-g1 = Gun()
+
 bullet = 0
 balls = []
 
+n = 1
+def change(event=''):
+    global menu,n
+    menu = 1 - menu
+    n = 1
+    print(menu, n)
+s = 1
+def rules():
+    global fr
+    fr = tk.Frame(root,width=500,height=100,bg="darkred")
 
 def new_game(event=''):
-    global g1, screen1, balls, bullet
-    canvas.bind('<Button-1>', g1.fire2_start)
-    canvas.bind('<ButtonRelease-1>', g1.fire2_end)
-    canvas.bind('<Motion>', g1.targetting)
-    z = 0.03
-    targets = []
-    for i in range(3):
-        targets.append(Target())
-    while len(targets) != 0:
-        for t in targets:
-            t.move()
-        for b in balls:
-            b.move()
-            b.live -= 1
-            if b.live <= 0:
-                canvas.delete(b.id)
-                balls.remove(b)
-            for t in targets:
-                if b.hittest(t) and t.live:
-                    t.live = 0
-                    t.hit()
-                    targets.remove(t)
-        if len(targets) == 0:
-            for b in balls:
-                balls.remove(b)
-            canvas.bind('<Button-1>', '')
-            canvas.bind('<ButtonRelease-1>', '')
-            if 10 < bullet < 20:
-                canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
-            elif bullet % 10 == 1:
-                canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрел')
-            elif bullet % 10 == 2 or bullet % 10 == 3 or bullet % 10 == 4:
-                canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрела')
+    global g, screen1, balls, bullet, menu, n, but1, e1, k, s, text1,text2
+
+    if menu == 1:
+        if n ==1:
+            but1 = tk.Button(canvas, text="Start", width=16, height=1, command=change, font="Verdana 25")
+            but1.grid()
+            text1 = canvas.create_text(110, 100, text="Введите число целей", justify=tk.CENTER, font="Verdana 14")
+            text2 = canvas.create_text(160, 200, text="Пауза на правую кнопку мыши",justify=tk.CENTER, font="Verdana 14")
+            e1 = tk.Entry(canvas, width=56)
+            e1.grid()
+            l1 = tk.Label(text="Как же я люблю делать информатику в др", fg="#eee", bg="#333")
+            l1.pack()
+            n = 0
+    else:
+        but1.destroy()
+        canvas.itemconfig(text1, text = "")
+        canvas.itemconfig(text2, text="")
+        if s == 1:
+            k = int(e1.get())
+            s = k
+        e1.destroy()
+        g = Gun()
+        canvas.bind('<Button-3>', change)
+        canvas.bind('<Button-1>', g.fire2_start)
+        canvas.bind('<ButtonRelease-1>', g.fire2_end)
+        canvas.bind('<Motion>', g.targetting)
+        z = 0.03
+        targets = []
+        for i in range(s):
+            targets.append(Target())
+        while len(targets) != 0:
+            if menu != 1:
+                canvas.bind('<Motion>', g.targetting)
+                canvas.bind('<Button-1>', g.fire2_start)
+                canvas.bind('<ButtonRelease-1>', g.fire2_end)
+                g.move()
+                for t in targets:
+                    t.move()
+                for b in balls:
+                    b.move()
+                    b.live -= 1
+                    if b.live <= 0:
+                        canvas.delete(b.id)
+                        balls.remove(b)
+                    for t in targets:
+                        if b.hittest(t) and t.live:
+                            t.live = 0
+                            t.hit()
+                            targets.remove(t)
             else:
-                canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
+                canvas.bind('<Button-1>', '')
+                canvas.bind('<ButtonRelease-1>', '')
+                canvas.bind('<Motion>', '')
             canvas.update()
-            time.sleep(0.25)
-            bullet = 0
+            time.sleep(z)
+            g.targetting()
+            g.power_up()
+            if len(targets) == 0:
+                g.destroy1()
+                canvas.delete(g.id)
+                for b in balls:
+                    canvas.delete(b.id)
+                    balls.remove(b)
+                canvas.bind('<Button-1>', '')
+                canvas.bind('<ButtonRelease-1>', '')
+                if 10 < bullet < 20:
+                    canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
+                elif bullet % 10 == 1:
+                    canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрел')
+                elif bullet % 10 == 2 or bullet % 10 == 3 or bullet % 10 == 4:
+                    canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрела')
+                else:
+                    canvas.itemconfig(screen1, text='Вы уничтожили цель за ' + str(bullet) + ' выстрелов')
+                canvas.update()
+                time.sleep(0.35)
+                bullet = 0
+        canvas.itemconfig(screen1, text='')
         canvas.update()
-        time.sleep(z)
-        g1.targetting()
-        g1.power_up()
-        g1.move()
-    canvas.itemconfig(screen1, text='')
-    canvas.update()
     root.after(750, new_game)
 
 
