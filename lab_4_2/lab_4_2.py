@@ -117,7 +117,7 @@ def sohranispasi():
     global Spisok_spiskov
     top = open('spisok.txt', 'w')
     for i in Spisok_spiskov:
-        top.write(i[0] + '\n')
+        top.write(str(i[0]) + '\n')
         top.write(str(i[1]) + '\n')
 
 # Холст, на котором ввод имени

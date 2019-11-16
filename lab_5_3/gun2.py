@@ -13,6 +13,38 @@ p = 0.0
 screen2 = canvas.create_text(30, 30, text=p, font='28')
 
 menu = 1
+Spisok_spiskov = []
+name = ''
+
+
+def dey(r):
+    return r[1]
+
+
+def spasisohrani():
+    global Spisok_spiskov
+    top = open('spisok.txt', 'r')
+    imya = []
+    score = []
+    d = 1
+    for i in top:
+        if d:
+            imya.append(i)
+        else:
+            score.append(i)
+        d = 1 - d
+    for i in range(0, len(imya), 1):
+        Spisok_spiskov.append([imya[i][:-1], float(score[i][:-1])])
+    Spisok_spiskov.sort(key=dey, reverse=1)
+
+
+def sohranispasi():
+    global Spisok_spiskov
+    top = open('spisok.txt', 'w')
+    for i in Spisok_spiskov:
+        top.write(i[0] + '\n')
+        top.write(str(i[1]) + '\n')
+
 
 class Ball:
     def __init__(self):
@@ -75,7 +107,6 @@ class Ball:
         self.set_coords()
 
     def hittest(self, obj):
-
         if math.hypot(self.x - obj.x, self.y - obj.y) <= (self.r + obj.r):
             canvas.delete(self.id)
             return True
@@ -85,6 +116,8 @@ class Ball:
 
 class Gun:
     def __init__(self):
+        global s
+        self.live = s
         self.x = 20
         self.y = 450
         self.vy = 2
@@ -113,6 +146,24 @@ class Gun:
             self.y + max(self.f2_power, 20) * math.sin(self.an)
         )
 
+    def g_up(self, event):
+        global a
+        self.y -= self.vy
+        if self.y < 100:
+            self.y += self.vy
+        a = self.y
+
+        self.set_coords()
+
+    def g_down(self, event):
+        global a
+        self.y += self.vy
+        if self.y > 500:
+            self.y -= self.vy
+        a = self.y
+
+        self.set_coords()
+
     def move(self):
         global a
         self.y += self.vy
@@ -133,8 +184,8 @@ class Gun:
         new_ball = Ball()
         new_ball.r += 5
         self.an = math.atan((event.y - new_ball.y) / (event.x - new_ball.x))
-        new_ball.vx = 3*self.f2_power * math.cos(self.an)
-        new_ball.vy = - 3*self.f2_power * math.sin(self.an)
+        new_ball.vx = 3 * self.f2_power * math.cos(self.an)
+        new_ball.vy = - 3 * self.f2_power * math.sin(self.an)
         balls += [new_ball]
         self.f2_on = 0
         self.f2_power = 10
@@ -182,11 +233,11 @@ class Target:
         self.new_target()
 
     def new_target(self):
-        self.vx = rnd(-8, 8)
-        self.vy = rnd(-8, 8)
+        self.vx = rnd(-10, 10)
+        self.vy = rnd(-10, 10)
         self.x = rnd(500, 760)
         self.y = rnd(300, 400)
-        self.r = rnd(10, 40)
+        self.r = rnd(10, 30)
         color = self.color = 'red'
         canvas.coords(self.id, self.x - self.r, self.y - self.r, self.x + self.r, self.y + self.r)
         canvas.itemconfig(self.id, fill=color)
@@ -214,8 +265,8 @@ class Target:
         if self.x + self.r >= 760:
             self.x -= (self.x + self.r) - 760
             self.vx = -self.vx
-        elif self.x - self.r <= 300:
-            self.x = 300 + self.r
+        elif self.x - self.r <= 10:
+            self.x = 10 + self.r
             self.vx = -self.vx
 
         if self.y + self.r >= 500:
@@ -228,44 +279,72 @@ class Target:
 
 screen1 = canvas.create_text(400, 300, text='', font='28')
 
-
 bullet = 0
 balls = []
 
 n = 1
+
+
 def change(event=''):
-    global menu,n
+    global menu, n
     menu = 1 - menu
     n = 1
     print(menu, n)
+
+
 s = 1
-def rules():
-    global fr
-    fr = tk.Frame(root,width=500,height=100,bg="darkred")
+
+
+def spisok():
+    change()
+    window = tk.Toplevel(root)
+    window.geometry('300x600')
+    for i in range(0, len(Spisok_spiskov), 1):
+        txt = str(i + 1) + '     ' + Spisok_spiskov[i][0] + ' = ' + str(Spisok_spiskov[i][1]) + ' Points'
+        msg = tk.Message(window, text=txt, width=1000)
+        msg.pack()
+        #window.create_text(50, 200 + 30 * i, text=txt, justify=tk.CENTER, font="Verdana 25", anchor=tk.W)
+
 
 def new_game(event=''):
-    global g, screen1, balls, bullet, menu, n, but1, e1, k, s, text1,text2
-
+    global g, screen1, screen2, balls, bullet, menu, n, but1, e1, k, s, text1, text2, text3, but2, e2, name
     if menu == 1:
-        if n ==1:
+        if n == 1:
             but1 = tk.Button(canvas, text="Start", width=16, height=1, command=change, font="Verdana 25")
             but1.grid()
-            text1 = canvas.create_text(110, 100, text="Введите число целей", justify=tk.CENTER, font="Verdana 14")
-            text2 = canvas.create_text(160, 200, text="Пауза на правую кнопку мыши",justify=tk.CENTER, font="Verdana 14")
+            text1 = canvas.create_text(470, 78, text="Введите число целей", justify=tk.CENTER, font="Verdana 12")
+
             e1 = tk.Entry(canvas, width=56)
             e1.grid()
+
             l1 = tk.Label(text="Как же я люблю делать информатику в др", fg="#eee", bg="#333")
             l1.pack()
+            text2 = canvas.create_text(500, 90, text="Введите имя", justify=tk.CENTER,
+                                       font="Verdana 12")
+            text3 = canvas.create_text(400, 130,
+                                       text="Пауза на правую кнопку мыши, пушка вверх - на Таб, вниз на - Левый Альт",
+                                       justify=tk.CENTER,
+                                       font="Verdana 12")
+            e2 = tk.Entry(canvas, width=50)
+            e2.grid()
+            but3 = tk.Button(canvas, text="Leadertop", width=16, height=1, command=spisok, font="Verdana 25")
+            but3.grid()
             n = 0
     else:
         but1.destroy()
-        canvas.itemconfig(text1, text = "")
+        canvas.itemconfig(text1, text="")
         canvas.itemconfig(text2, text="")
+        canvas.itemconfig(text3, text="")
         if s == 1:
+            name = e2.get()
             k = int(e1.get())
+            screen2 = canvas.create_text(500, 30, text=p, font='28')
             s = k
         e1.destroy()
+        e2.destroy()
         g = Gun()
+        canvas.bind('<Tab>', g.g_up)
+        canvas.bind('<Alt_L>', g.g_down)
         canvas.bind('<Button-3>', change)
         canvas.bind('<Button-1>', g.fire2_start)
         canvas.bind('<ButtonRelease-1>', g.fire2_end)
@@ -279,9 +358,19 @@ def new_game(event=''):
                 canvas.bind('<Motion>', g.targetting)
                 canvas.bind('<Button-1>', g.fire2_start)
                 canvas.bind('<ButtonRelease-1>', g.fire2_end)
-                g.move()
+                canvas.bind('<Tab>', g.g_up)
+                canvas.bind('<Alt_L>', g.g_down)
+                # g.move()
                 for t in targets:
                     t.move()
+                    if abs(t.x - g.x) < 30 and abs(t.y - g.y) < 30:
+                        g.live -= 1
+                        print("CATCH")
+                        print(str(g.live))
+                        if g.live == 0:
+                            Spisok_spiskov.append([name, p])
+                            sohranispasi()
+                            exit()
                 for b in balls:
                     b.move()
                     b.live -= 1
@@ -297,6 +386,8 @@ def new_game(event=''):
                 canvas.bind('<Button-1>', '')
                 canvas.bind('<ButtonRelease-1>', '')
                 canvas.bind('<Motion>', '')
+                canvas.bind('<Tab>', '')
+                canvas.bind('<Alt_L>', '')
             canvas.update()
             time.sleep(z)
             g.targetting()
@@ -325,5 +416,7 @@ def new_game(event=''):
     root.after(750, new_game)
 
 
+spasisohrani()
 new_game()
+
 tk.mainloop()
